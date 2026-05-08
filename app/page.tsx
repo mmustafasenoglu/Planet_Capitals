@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../lib/storage-adapter';
+
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -121,7 +123,7 @@ export default function Home() {
 
     try {
       // Önce yeni anahtar sistemini kontrol et
-      const newUserData = localStorage.getItem('pc_current_user');
+      const newUserData = storage.getItem('pc_current_user');
       if (newUserData) {
         const user = JSON.parse(newUserData);
         setCurrentUser(user);
@@ -130,7 +132,7 @@ export default function Home() {
       }
 
       // Eski sistem için fallback
-      const oldUserData = localStorage.getItem('currentUser');
+      const oldUserData = storage.getItem('currentUser');
       if (oldUserData) {
         const user = JSON.parse(oldUserData);
         setCurrentUser(user);
@@ -170,7 +172,7 @@ export default function Home() {
   useEffect(() => {
     if (!mounted) return;
 
-    const savedLaunches = localStorage.getItem('adminLaunches');
+    const savedLaunches = storage.getItem('adminLaunches');
     if (savedLaunches) {
       try {
         const launches = JSON.parse(savedLaunches);
@@ -419,8 +421,8 @@ export default function Home() {
   const handleLogout = () => {
     if (typeof localStorage !== 'undefined') {
       // ✅ HER İKİ ANAHTARI DA TEMİZLE
-      localStorage.removeItem('pc_current_user');
-      localStorage.removeItem('currentUser');
+      storage.removeItem('pc_current_user');
+      storage.removeItem('currentUser');
     }
     setCurrentUser(null);
     setIsLoggedIn(false);

@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { getUserBalance, getCurrentCoinPrices } from '../../lib/storage-helpers';
@@ -64,7 +66,7 @@ export default function WalletBalance() {
       setTotalCoinValue(coinValue);
       
       // ✅ KÖKTEN ÇÖZÜM: Admin panelindeki onaylanmış çekimleri kontrol et
-      const adminWithdrawals = JSON.parse(localStorage.getItem('withdrawalHistory') || '[]');
+      const adminWithdrawals = JSON.parse(storage.getItem('withdrawalHistory') || '[]');
       const adminApprovedIds = adminWithdrawals
         .filter((w: any) => w.status === 'approved')
         .map((w: any) => w.transactionId)

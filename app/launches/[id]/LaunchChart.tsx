@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
@@ -36,7 +38,7 @@ export default function LaunchChart({ launchId }: LaunchChartProps = {}) {
   // ✅ ADMIN PANELİNDEN GERÇEK FİYAT VERİSİNİ ALMA
   const getAdminPriceData = () => {
     try {
-      const adminLaunches = localStorage.getItem('adminLaunches');
+      const adminLaunches = storage.getItem('adminLaunches');
       if (!adminLaunches) return null;
 
       const launches = JSON.parse(adminLaunches);
@@ -81,7 +83,7 @@ export default function LaunchChart({ launchId }: LaunchChartProps = {}) {
   const savePriceHistory = (newPrice: number, coinSymbol: string) => {
     try {
       const historyKey = `price_history_${coinSymbol}_${launchId}`;
-      const existingHistory = JSON.parse(localStorage.getItem(historyKey) || '[]');
+      const existingHistory = JSON.parse(storage.getItem(historyKey) || '[]');
       
       // Son kayıtlı fiyat ile karşılaştır
       const lastRecord = existingHistory[existingHistory.length - 1];
@@ -102,7 +104,7 @@ export default function LaunchChart({ launchId }: LaunchChartProps = {}) {
         existingHistory.splice(0, existingHistory.length - 1000);
       }
 
-      localStorage.setItem(historyKey, JSON.stringify(existingHistory));
+      storage.setItem(historyKey, JSON.stringify(existingHistory));
       console.log(`💾 Fiyat geçmişi kaydedildi: ${newPrice} ${coinSymbol}`);
       
     } catch (error) {
@@ -114,7 +116,7 @@ export default function LaunchChart({ launchId }: LaunchChartProps = {}) {
   const getPriceHistory = (coinSymbol: string) => {
     try {
       const historyKey = `price_history_${coinSymbol}_${launchId}`;
-      const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+      const history = JSON.parse(storage.getItem(historyKey) || '[]');
       return history.map((record: any) => ({
         ...record,
         date: new Date(record.timestamp)

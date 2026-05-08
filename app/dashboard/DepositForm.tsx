@@ -1,4 +1,6 @@
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { getUserBalance, saveUserBalance, addTransaction } from '../../lib/storage-helpers';
@@ -137,9 +139,9 @@ export default function DepositForm({ onSuccess }: DepositFormProps) {
       };
 
       // Mevcut bekleyen yatırımları al ve yeni talebi ekle
-      const existingDeposits = JSON.parse(localStorage.getItem('pendingDeposits') || '[]');
+      const existingDeposits = JSON.parse(storage.getItem('pendingDeposits') || '[]');
       existingDeposits.push(depositRequest);
-      localStorage.setItem('pendingDeposits', JSON.stringify(existingDeposits));
+      writeJSON('pendingDeposits', existingDeposits);
 
       console.log('✅ Yatırım talebi başarıyla oluşturuldu:', depositRequest);
       

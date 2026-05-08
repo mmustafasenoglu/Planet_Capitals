@@ -173,6 +173,19 @@ export async function POST(request: NextRequest) {
           throw error;
         }
         
+      
+      case 'getAll':
+        try {
+          const [rows] = await connection.execute(
+            `SELECT storage_key, storage_value FROM storage_data`
+          ) as [any[], any];
+          
+          return NextResponse.json({ success: true, data: rows });
+          
+        } catch (error) {
+          throw error;
+        }
+  
       case 'getAllKeys':
         try {
           const [rows] = await connection.execute(

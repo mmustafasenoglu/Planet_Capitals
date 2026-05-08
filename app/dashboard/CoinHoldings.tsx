@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -58,7 +60,7 @@ export default function CoinHoldings() {
 
     // Admin lansmanlarından da kontrol et
     try {
-      const adminLaunches = localStorage.getItem('adminLaunches');
+      const adminLaunches = storage.getItem('adminLaunches');
       if (adminLaunches) {
         const launches = JSON.parse(adminLaunches);
         const adminLaunch = launches.find((l: any) => l.symbol === symbol);

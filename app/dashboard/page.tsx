@@ -47,7 +47,7 @@ export default function DashboardPage() {
         let userData = null;
 
         // Yeni sistem kontrolü
-        const newUser = localStorage.getItem('pc_current_user');
+        const newUser = storage.getItem('pc_current_user');
         if (newUser) {
           try {
             userData = JSON.parse(newUser);
@@ -62,7 +62,7 @@ export default function DashboardPage() {
 
         // Eski sistem kontrolü (fallback)
         if (!isLoggedIn) {
-          const oldUser = localStorage.getItem('currentUser');
+          const oldUser = storage.getItem('currentUser');
           if (oldUser) {
             try {
               userData = JSON.parse(oldUser);
@@ -78,8 +78,8 @@ export default function DashboardPage() {
 
         // RegisteredUsers kontrolü (fallback)
         if (!isLoggedIn) {
-          const registeredUsers = localStorage.getItem('registeredUsers');
-          const savedEmail = localStorage.getItem('userEmail') || localStorage.getItem('currentUserEmail');
+          const registeredUsers = storage.getItem('registeredUsers');
+          const savedEmail = storage.getItem('userEmail') || storage.getItem('currentUserEmail');
           
           if (registeredUsers && savedEmail) {
             try {
@@ -167,7 +167,7 @@ export default function DashboardPage() {
           DEFI: { price: 4.5, change24h: 2.9, name: 'DeFi Protocol', color: 'indigo' }
         };
 
-        const userBalances = localStorage.getItem('userBalances');
+        const userBalances = storage.getItem('userBalances');
         let balances = {};
         
         if (userBalances) {

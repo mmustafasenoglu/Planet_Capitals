@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 
@@ -31,8 +33,8 @@ export default function PaymentMethods({ selectedMethod, setSelectedMethod, sele
   useEffect(() => {
     const loadWalletStatus = () => {
       // Admin panel'den gelen durumları kontrol et
-      const adminWalletStatus = localStorage.getItem('adminWalletStatus');
-      const walletAddressStatus = localStorage.getItem('walletAddressStatus');
+      const adminWalletStatus = storage.getItem('adminWalletStatus');
+      const walletAddressStatus = storage.getItem('walletAddressStatus');
       
       console.log('🔍 Admin wallet status:', adminWalletStatus);
       console.log('🔍 Wallet address status:', walletAddressStatus);

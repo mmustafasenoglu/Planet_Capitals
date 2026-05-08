@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { getUserBalance, saveUserBalance, addTransaction } from '../../lib/storage-helpers';
@@ -26,7 +28,7 @@ export default function BuyCoinForm({ onSuccess }: BuyCoinFormProps) {
       console.log('🔄 Launch coinleri yükleniyor (sadece launches sayfasındakiler)...');
       
       // Launches sayfasından admin coinleri + default coinleri al
-      const savedLaunches = localStorage.getItem('adminLaunches');
+      const savedLaunches = storage.getItem('adminLaunches');
       let allLaunchCoins: any[] = [];
       
       if (savedLaunches) {

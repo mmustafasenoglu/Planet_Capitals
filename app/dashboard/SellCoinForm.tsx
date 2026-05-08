@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { getUserBalance, saveUserBalance, addTransaction } from '../../lib/storage-helpers';
@@ -22,7 +24,7 @@ export default function SellCoinForm({ onSuccess }: SellCoinFormProps) {
   // ✅ YENİ: Launch token fiyatları
   const getLaunchTokenPrice = (symbol: string) => {
     // 1. Admin launches'dan fiyat al
-    const savedLaunches = localStorage.getItem('adminLaunches');
+    const savedLaunches = storage.getItem('adminLaunches');
     if (savedLaunches) {
       try {
         const adminLaunchList = JSON.parse(savedLaunches);
@@ -59,7 +61,7 @@ export default function SellCoinForm({ onSuccess }: SellCoinFormProps) {
       const filteredCoins: { [key: string]: number } = {};
       
       // ✅ 1. LAUNCHES SAYFASINDAKİ TÜM TOKEN'LARI AL
-      const savedLaunches = localStorage.getItem('adminLaunches');
+      const savedLaunches = storage.getItem('adminLaunches');
       const allLaunchTokenSymbols = new Set<string>();
       
       // Admin launches'dan token'ları ekle

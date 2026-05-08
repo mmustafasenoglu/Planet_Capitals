@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { readJSON, writeJSON } from '../../../lib/storage-helpers';
@@ -116,9 +118,9 @@ export default function UserManagement() {
     setBulkActionType(action);
 
     try {
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const registeredUsers = JSON.parse(storage.getItem('registeredUsers') || '[]');
       const suspendedUsers = readJSON('suspendedUsers', []);
-      const userBalances = JSON.parse(localStorage.getItem('userBalances') || '{}');
+      const userBalances = JSON.parse(storage.getItem('userBalances') || '{}');
 
       if (action === 'delete') {
         // Kullanıcıları sil
@@ -137,8 +139,8 @@ export default function UserManagement() {
 
         // Kayıtlı kullanıcılar listesinden çıkar
         const remainingUsers = registeredUsers.filter((u: any) => !selectedUsers.has(u.email));
-        localStorage.setItem('registeredUsers', JSON.stringify(remainingUsers));
-        localStorage.setItem('userBalances', JSON.stringify(userBalances));
+        storage.setItem('registeredUsers', JSON.stringify(remainingUsers));
+        storage.setItem('userBalances', JSON.stringify(userBalances));
         writeJSON('deletedUsers', deletedUsers);
 
         // Askıya alınmış listesinden de çıkar
@@ -162,7 +164,7 @@ export default function UserManagement() {
             ? { ...u, status: 'suspended', suspensionDate: new Date().toISOString() } 
             : u
         );
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+        storage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
         setMessage(`${selectedUsers.size} kullanıcı hesabı pasifleştirildi`);
 
@@ -177,7 +179,7 @@ export default function UserManagement() {
             ? { ...u, status: 'active', reactivationDate: new Date().toISOString() } 
             : u
         );
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+        storage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
         setMessage(`${selectedUsers.size} kullanıcı hesabı aktifleştirildi`);
       }
@@ -224,7 +226,7 @@ export default function UserManagement() {
 
       // Eğer API'den veri gelmediyse yerel depolama/sync yapısını kullan
       if (registeredUsers.length === 0) {
-        registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        registeredUsers = JSON.parse(storage.getItem('registeredUsers') || '[]');
         suspendedUsers = readJSON('suspendedUsers', []);
       }
 
@@ -276,7 +278,7 @@ export default function UserManagement() {
 
   const getUserBalance = (email: string): UserBalance => {
     // ✅ YENİ: SADECE USDT COIN BAKİYESİNİ KULLAN - DASHBOARD İLE AYNI KAYNAK
-    const userBalances = localStorage.getItem('userBalances');
+    const userBalances = storage.getItem('userBalances');
     if (userBalances) {
       const balances = JSON.parse(userBalances);
       const userBalance = balances[email] || { coins: {}, wallet_usdt: 0 };
@@ -347,11 +349,11 @@ export default function UserManagement() {
         }
 
         // Kayıtlı kullanıcılar listesinde durumu güncelle
-        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        const registeredUsers = JSON.parse(storage.getItem('registeredUsers') || '[]');
         const updatedUsers = registeredUsers.map((u: any) =>
           u.email === email ? { ...u, status: 'suspended', suspensionDate: new Date().toISOString() } : u
         );
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+        storage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
         setMessage('Kullanıcı hesabı pasifleştirildi');
       } else {
@@ -360,11 +362,11 @@ export default function UserManagement() {
         writeJSON('suspendedUsers', updatedSuspended);
 
         // Kayıtlı kullanıcılar listesinde durumu güncelle
-        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        const registeredUsers = JSON.parse(storage.getItem('registeredUsers') || '[]');
         const updatedUsers = registeredUsers.map((u: any) =>
           u.email === email ? { ...u, status: 'active', reactivationDate: new Date().toISOString() } : u
         );
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+        storage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
         setMessage('Kullanıcı hesabı aktifleştirildi');
       }
@@ -386,15 +388,15 @@ export default function UserManagement() {
     setLoading(true);
     try {
       // Kayıtlı kullanıcılar listesinden çıkar
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const registeredUsers = JSON.parse(storage.getItem('registeredUsers') || '[]');
       const userToDelete = registeredUsers.find((u: any) => u.email === email);
       const updatedUsers = registeredUsers.filter((u: any) => u.email !== email);
-      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      storage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
       // Kullanıcı bakiyelerini sil
-      const userBalances = JSON.parse(localStorage.getItem('userBalances') || '{}');
+      const userBalances = JSON.parse(storage.getItem('userBalances') || '{}');
       delete userBalances[email];
-      localStorage.setItem('userBalances', JSON.stringify(userBalances));
+      storage.setItem('userBalances', JSON.stringify(userBalances));
 
       // Silinen kullanıcıları kaydet
       const deletedUsers = readJSON('deletedUsers', []);
@@ -427,11 +429,11 @@ export default function UserManagement() {
 
     setLoading(true);
     try {
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const registeredUsers = JSON.parse(storage.getItem('registeredUsers') || '[]');
       const updatedUsers = registeredUsers.map((u: any) =>
         u.email === selectedUser.email ? { ...u, adminNotes: userNotes } : u
       );
-      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      storage.setItem('registeredUsers', JSON.stringify(updatedUsers));
 
       // State'i güncelle
       setUsers(prev =>
@@ -549,7 +551,7 @@ export default function UserManagement() {
   // ✨ YENİ: KULLANICI EVRAKLARINI YÜKLEME FONKSİYONU
   const loadUserDocuments = (userEmail: string) => {
     try {
-      const userDocuments = localStorage.getItem('userDocuments');
+      const userDocuments = storage.getItem('userDocuments');
       if (userDocuments) {
         const documents = JSON.parse(userDocuments);
         const userDocs = documents[userEmail] || {};
@@ -569,7 +571,7 @@ export default function UserManagement() {
 
     setLoading(true);
     try {
-      const userDocuments = JSON.parse(localStorage.getItem('userDocuments') || '{}');
+      const userDocuments = JSON.parse(storage.getItem('userDocuments') || '{}');
       
       if (!userDocuments[selectedUser.email]) {
         userDocuments[selectedUser.email] = {};
@@ -584,10 +586,10 @@ export default function UserManagement() {
         actionBy: 'admin'
       };
 
-      localStorage.setItem('userDocuments', JSON.stringify(userDocuments));
+      storage.setItem('userDocuments', JSON.stringify(userDocuments));
 
       // Evrak geçmişini kaydet
-      const documentHistory = JSON.parse(localStorage.getItem('documentHistory') || '[]');
+      const documentHistory = JSON.parse(storage.getItem('documentHistory') || '[]');
       documentHistory.unshift({
         id: Date.now().toString(),
         userEmail: selectedUser.email,
@@ -598,7 +600,7 @@ export default function UserManagement() {
         actionBy: 'admin',
         fileName: docData.fileName
       });
-      localStorage.setItem('documentHistory', JSON.stringify(documentHistory));
+      storage.setItem('documentHistory', JSON.stringify(documentHistory));
 
       // State'leri güncelle
       loadUserDocuments(selectedUser.email);
@@ -637,7 +639,7 @@ export default function UserManagement() {
   // ✨ YENİ: KULLANICININ EVRAK DURUMUNU KONTROL ETME
   const getUserDocumentSummary = (email: string) => {
     try {
-      const userDocuments = localStorage.getItem('userDocuments');
+      const userDocuments = storage.getItem('userDocuments');
       if (!userDocuments) return { total: 0, approved: 0, pending: 0, rejected: 0 };
 
       const documents = JSON.parse(userDocuments);

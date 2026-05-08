@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -128,9 +130,9 @@ export default function WithdrawForm({ onSuccess }: WithdrawFormProps) {
         transactionId: withdrawTransaction.id
       };
 
-      const existingWithdrawals = JSON.parse(localStorage.getItem('pendingWithdrawals') || '[]');
+      const existingWithdrawals = JSON.parse(storage.getItem('pendingWithdrawals') || '[]');
       existingWithdrawals.push(withdrawalRequest);
-      localStorage.setItem('pendingWithdrawals', JSON.stringify(existingWithdrawals));
+      storage.setItem('pendingWithdrawals', JSON.stringify(existingWithdrawals));
       
       setShowSuccess(true);
       

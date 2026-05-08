@@ -26,6 +26,7 @@ class MySQLStorageAdapter implements StorageAdapter {
   constructor() {
     // localStorage'dan cache'i yükle
     this.loadFromLocalStorage();
+    this.syncFromServer();
     
     // Periyodik sync başlat
     this.startPeriodicSync();
@@ -38,6 +39,42 @@ class MySQLStorageAdapter implements StorageAdapter {
     }
   }
 
+  
+  public async syncFromServer() {
+    if (typeof window === 'undefined') return;
+    try {
+      const resp = await fetch('/api/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getAll' })
+      });
+      const result = await resp.json().catch(() => ({}));
+      
+      if (result?.success && result.data) {
+        let changed = false;
+        for (const row of result.data) {
+          const key = row.storage_key;
+          const val = row.storage_value;
+          
+          if (this.cache.get(key) !== val) {
+            this.cache.set(key, val);
+            if (window.localStorage) {
+              window.localStorage.setItem(key, val);
+            }
+            changed = true;
+          }
+        }
+        
+        if (changed) {
+          console.log('🔄 Veritabanından güncel veriler çekildi ve eşitlendi');
+          window.dispatchEvent(new Event('db_sync_completed'));
+        }
+      }
+    } catch(e) {
+      console.error('Sync from server error:', e);
+    }
+  }
+  
   private loadFromLocalStorage() {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {

@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect, useRef } from 'react';
 
@@ -40,7 +42,7 @@ export default function AdminChatPanel() {
 
   const loadChatSessions = () => {
     try {
-      const sessions = JSON.parse(localStorage.getItem('adminChatSessions') || '[]');
+      const sessions = JSON.parse(storage.getItem('adminChatSessions') || '[]');
       const processedSessions = sessions.map((session: ChatSession) => ({
         ...session,
         startTime: new Date(session.startTime),
@@ -90,23 +92,23 @@ export default function AdminChatPanel() {
 
     try {
       // Update admin sessions
-      const adminSessions = JSON.parse(localStorage.getItem('adminChatSessions') || '[]');
+      const adminSessions = JSON.parse(storage.getItem('adminChatSessions') || '[]');
       const adminIndex = adminSessions.findIndex((s: ChatSession) => s.id === sessionId);
       
       if (adminIndex !== -1) {
         adminSessions[adminIndex].messages.push(message);
         adminSessions[adminIndex].lastActivity = new Date();
-        localStorage.setItem('adminChatSessions', JSON.stringify(adminSessions));
+        storage.setItem('adminChatSessions', JSON.stringify(adminSessions));
       }
 
       // Update user sessions
-      const userSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+      const userSessions = JSON.parse(storage.getItem('chatSessions') || '[]');
       const userIndex = userSessions.findIndex((s: ChatSession) => s.id === sessionId);
       
       if (userIndex !== -1) {
         userSessions[userIndex].messages.push(message);
         userSessions[userIndex].lastActivity = new Date();
-        localStorage.setItem('chatSessions', JSON.stringify(userSessions));
+        storage.setItem('chatSessions', JSON.stringify(userSessions));
       }
 
       // Update local state
@@ -133,8 +135,8 @@ export default function AdminChatPanel() {
 
   const toggleSessionStatus = (sessionId: string) => {
     try {
-      const adminSessions = JSON.parse(localStorage.getItem('adminChatSessions') || '[]');
-      const userSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
+      const adminSessions = JSON.parse(storage.getItem('adminChatSessions') || '[]');
+      const userSessions = JSON.parse(storage.getItem('chatSessions') || '[]');
 
       const adminIndex = adminSessions.findIndex((s: ChatSession) => s.id === sessionId);
       const userIndex = userSessions.findIndex((s: ChatSession) => s.id === sessionId);
@@ -143,12 +145,12 @@ export default function AdminChatPanel() {
 
       if (adminIndex !== -1) {
         adminSessions[adminIndex].status = newStatus;
-        localStorage.setItem('adminChatSessions', JSON.stringify(adminSessions));
+        storage.setItem('adminChatSessions', JSON.stringify(adminSessions));
       }
 
       if (userIndex !== -1) {
         userSessions[userIndex].status = newStatus;
-        localStorage.setItem('chatSessions', JSON.stringify(userSessions));
+        storage.setItem('chatSessions', JSON.stringify(userSessions));
       }
 
       setChatSessions(prev => prev.map(s => 

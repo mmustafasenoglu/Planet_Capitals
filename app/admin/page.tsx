@@ -1,4 +1,6 @@
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -133,7 +135,7 @@ export default function AdminPage() {
   // ✅ YENİ: OTURUM KONTROLÜ - TÜM HOOK'LARDAN SONRA
   useEffect(() => {
     const checkAdminSession = () => {
-      const adminSession = localStorage.getItem('adminSession');
+      const adminSession = storage.getItem('adminSession');
       
       if (!adminSession) {
         // Oturum yok - hemen yönlendir
@@ -149,7 +151,7 @@ export default function AdminPage() {
 
         if (now - sessionTime > sessionDuration) {
           // Oturum süresi dolmuş - hemen yönlendir
-          localStorage.removeItem('adminSession');
+          storage.removeItem('adminSession');
           router.replace('/admin/login');
           return;
         }
@@ -159,7 +161,7 @@ export default function AdminPage() {
         setIsCheckingSession(false);
       } catch (error) {
         // Hatalı oturum verisi - hemen yönlendir
-        localStorage.removeItem('adminSession');
+        storage.removeItem('adminSession');
         router.replace('/admin/login');
         return;
       }
@@ -173,7 +175,7 @@ export default function AdminPage() {
     if (!sessionValid) return;
 
     // Get registered users from localStorage
-    const registeredUsers = localStorage.getItem('registeredUsers');
+    const registeredUsers = storage.getItem('registeredUsers');
     if (registeredUsers) {
       const parsedUsers = JSON.parse(registeredUsers);
       setUsers(parsedUsers);
@@ -189,7 +191,7 @@ export default function AdminPage() {
     loadPriceHistories();
 
     // Load contact messages from localStorage
-    const savedMessages = localStorage.getItem('contactMessages');
+    const savedMessages = storage.getItem('contactMessages');
     if (savedMessages) {
       try {
         setContactMessages(JSON.parse(savedMessages));
@@ -200,7 +202,7 @@ export default function AdminPage() {
     }
 
     // Load chat sessions from localStorage
-    const savedChatSessions = localStorage.getItem('chatSessions');
+    const savedChatSessions = storage.getItem('chatSessions');
     if (savedChatSessions) {
       try {
         setChatSessions(JSON.parse(savedChatSessions));
@@ -211,25 +213,25 @@ export default function AdminPage() {
     }
 
     // Load wallet addresses from localStorage
-    const savedAddresses = localStorage.getItem('adminWalletAddresses');
+    const savedAddresses = storage.getItem('adminWalletAddresses');
     if (savedAddresses) {
       setWalletAddresses(JSON.parse(savedAddresses));
     }
 
     // ✅ YENİ: AKTİF/PASİF DURUMLARINI YÜKLE
-    const savedStatus = localStorage.getItem('adminWalletStatus');
+    const savedStatus = storage.getItem('adminWalletStatus');
     if (savedStatus) {
       setWalletStatus(JSON.parse(savedStatus));
     }
 
     // Load bank info from localStorage
-    const savedBankInfo = localStorage.getItem('adminBankInfo');
+    const savedBankInfo = storage.getItem('adminBankInfo');
     if (savedBankInfo) {
       setBankInfo(JSON.parse(savedBankInfo));
     }
 
     // Load launches from localStorage
-    const savedLaunches = localStorage.getItem('adminLaunches');
+    const savedLaunches = storage.getItem('adminLaunches');
     if (savedLaunches) {
       const parsedLaunches = JSON.parse(savedLaunches);
       setLaunches(parsedLaunches);
@@ -286,7 +288,7 @@ export default function AdminPage() {
       ];
 
       setLaunches(defaultLaunches);
-      localStorage.setItem('adminLaunches', JSON.stringify(defaultLaunches));
+      writeJSON('adminLaunches', defaultLaunches);
       // ✨ COİN LİSTESİNİ GÜNCELLE
       updateAvailableCoins(defaultLaunches);
     }
@@ -637,7 +639,7 @@ export default function AdminPage() {
   });
 
   const getUserBalance = (email: string) => {
-    const userBalances = localStorage.getItem('userBalances');
+    const userBalances = storage.getItem('userBalances');
     if (userBalances) {
       try {
         const balances = JSON.parse(userBalances);
@@ -747,10 +749,10 @@ export default function AdminPage() {
   const updateWalletAddress = (coinType: string, newAddress: string) => {
     const updatedAddresses = { ...walletAddresses, [coinType]: newAddress };
     setWalletAddresses(updatedAddresses);
-    localStorage.setItem('adminWalletAddresses', JSON.stringify(updatedAddresses));
+    writeJSON('adminWalletAddresses', updatedAddresses);
 
     // Update in WalletInfo component's addresses as well
-    localStorage.setItem('walletAddresses', JSON.stringify(updatedAddresses));
+    writeJSON('walletAddresses', updatedAddresses);
 
     setMessage(`${coinType} adresi başarıyla güncellendi`);
     setEditingAddress('');
@@ -761,15 +763,15 @@ export default function AdminPage() {
   const toggleWalletStatus = (coinType: string) => {
     const updatedStatus = { ...walletStatus, [coinType]: !walletStatus[coinType] };
     setWalletStatus(updatedStatus);
-    localStorage.setItem('adminWalletStatus', JSON.stringify(updatedStatus));
-    localStorage.setItem('walletAddressStatus', JSON.stringify(updatedStatus)); // Deposit için
+    writeJSON('adminWalletStatus', updatedStatus);
+    writeJSON('walletAddressStatus', updatedStatus); // Deposit için
     
     setMessage(`${coinType} durumu ${updatedStatus[coinType] ? 'aktif' : 'pasif'} olarak güncellendi`);
     setTimeout(() => setMessage(''), 3000);
   };
 
   const updateBankInfo = () => {
-    localStorage.setItem('adminBankInfo', JSON.stringify(bankInfo));
+    writeJSON('adminBankInfo', bankInfo);
     setMessage('Banka bilgileri başarıyla güncellendi');
     setEditingBankInfo(false);
     setTimeout(() => setMessage(''), 3000);
@@ -781,13 +783,13 @@ export default function AdminPage() {
       msg.id === messageId ? { ...msg, note, status: note.trim() ? 'answered' : 'new' } : msg
     );
     setContactMessages(updatedMessages);
-    localStorage.setItem('contactMessages', JSON.stringify(updatedMessages));
+    writeJSON('contactMessages', updatedMessages);
   };
 
   const deleteContactMessage = (messageId: string) => {
     const updatedMessages = contactMessages.filter(msg => msg.id !== messageId);
     setContactMessages(updatedMessages);
-    localStorage.setItem('contactMessages', JSON.stringify(updatedMessages));
+    writeJSON('contactMessages', updatedMessages);
   };
 
   const sendChatReply = (sessionId: string, replyText: string) => {
@@ -811,7 +813,7 @@ export default function AdminPage() {
     });
 
     setChatSessions(updatedSessions);
-    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
+    writeJSON('chatSessions', updatedSessions);
   };
 
   const closeChatSession = (sessionId: string) => {
@@ -819,7 +821,7 @@ export default function AdminPage() {
       session.id === sessionId ? { ...session, status: 'closed' } : session
     );
     setChatSessions(updatedSessions);
-    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
+    writeJSON('chatSessions', updatedSessions);
   };
 
   // Launch management functions
@@ -925,7 +927,7 @@ export default function AdminPage() {
     }
 
     setLaunches(updatedLaunches);
-    localStorage.setItem('adminLaunches', JSON.stringify(updatedLaunches));
+    writeJSON('adminLaunches', updatedLaunches);
 
     // ✨ COİN LİSTESİNİ OTOMATIK GÜNCELLE
     updateAvailableCoins(updatedLaunches);
@@ -956,7 +958,7 @@ export default function AdminPage() {
   const deleteLaunch = (launchId: string) => {
     const updatedLaunches = launches.filter(launch => launch.id !== launchId);
     setLaunches(updatedLaunches);
-    localStorage.setItem('adminLaunches', JSON.stringify(updatedLaunches));
+    writeJSON('adminLaunches', updatedLaunches);
 
     // ✨ COİN LİSTESİNİ OTOMATIK GÜNCELLE
     updateAvailableCoins(updatedLaunches);
@@ -983,19 +985,19 @@ export default function AdminPage() {
 
     try {
       // Kayıtlı kullanıcılar listesinden çıkar
-      const registeredUsers = localStorage.getItem('registeredUsers');
+      const registeredUsers = storage.getItem('registeredUsers');
       if (registeredUsers) {
         const users = JSON.parse(registeredUsers);
         const updatedUsers = users.filter((u: any) => u.email !== userEmail);
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+        writeJSON('registeredUsers', updatedUsers);
       }
 
       // Kullanıcı bakiyelerini sil
-      const userBalances = localStorage.getItem('userBalances');
+      const userBalances = storage.getItem('userBalances');
       if (userBalances) {
         const balances = JSON.parse(userBalances);
         delete balances[userEmail];
-        localStorage.setItem('userBalances', JSON.stringify(balances));
+        writeJSON('userBalances', balances);
       }
 
       // Silinen kullanıcıları kaydet (isteğee bağlı geri yükleme için)
@@ -1030,7 +1032,7 @@ export default function AdminPage() {
       }
 
       // Kayıtlı kullanıcılar listesinde durumu güncelle
-      const registeredUsers = localStorage.getItem('registeredUsers');
+      const registeredUsers = storage.getItem('registeredUsers');
       if (registeredUsers) {
         const users = JSON.parse(registeredUsers);
         const updatedUsers = users.map((u: any) =>
@@ -1038,7 +1040,7 @@ export default function AdminPage() {
             ? { ...u, status: 'suspended', suspensionDate: new Date().toISOString() }
             : u
         );
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+        writeJSON('registeredUsers', updatedUsers);
         setUsers(updatedUsers);
       }
 
@@ -1058,7 +1060,7 @@ export default function AdminPage() {
       writeJSON('suspendedUsers', updatedSuspended);
 
       // Kayıtlı kullanıcılar listesinde durumu güncelle
-      const registeredUsers = localStorage.getItem('registeredUsers');
+      const registeredUsers = storage.getItem('registeredUsers');
       if (registeredUsers) {
         const users = JSON.parse(registeredUsers);
         const updatedUsers = users.map((u: any) =>
@@ -1066,7 +1068,7 @@ export default function AdminPage() {
             ? { ...u, status: 'active', reactivationDate: new Date().toISOString() }
             : u
         );
-        localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+        writeJSON('registeredUsers', updatedUsers);
         setUsers(updatedUsers);
       }
 
@@ -1124,7 +1126,7 @@ export default function AdminPage() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => {
-                  localStorage.removeItem('adminSession');
+                  storage.removeItem('adminSession');
                   router.push('/admin/login');
                 }}
                 className="text-red-600 hover:text-red-700 font-medium cursor-pointer flex items-center space-x-2"
@@ -1695,7 +1697,7 @@ export default function AdminPage() {
                                     : l
                                 );
                                 setLaunches(updatedLaunches);
-                                localStorage.setItem('adminLaunches', JSON.stringify(updatedLaunches));
+                                writeJSON('adminLaunches', updatedLaunches);
                                 
                                 // Fiyat geçmişini kaydet ve kullanıcı etkisini hesapla
                                 recordPriceChange(launch.symbol, launch.name, oldPrice, newPrice);
@@ -1746,7 +1748,7 @@ export default function AdminPage() {
                                     : l
                                 );
                                 setLaunches(updatedLaunches);
-                                localStorage.setItem('adminLaunches', JSON.stringify(updatedLaunches));
+                                writeJSON('adminLaunches', updatedLaunches);
                                 
                                 // Fiyat geçmişini kaydet ve kullanıcı etkisini hesapla
                                 recordPriceChange(launch.symbol, launch.name, oldPrice, newPrice);
@@ -1803,7 +1805,7 @@ export default function AdminPage() {
                                       : l
                                   );
                                   setLaunches(updatedLaunches);
-                                  localStorage.setItem('adminLaunches', JSON.stringify(updatedLaunches));
+                                  writeJSON('adminLaunches', updatedLaunches);
                                   
                                   // Fiyat geçmişini kaydet ve kullanıcı etkisini hesapla
                                   recordPriceChange(launch.symbol, launch.name, oldPrice, newPrice);
@@ -1850,7 +1852,7 @@ export default function AdminPage() {
                                     : l
                                 );
                                 setLaunches(updatedLaunches);
-                                localStorage.setItem('adminLaunches', JSON.stringify(updatedLaunches));
+                                writeJSON('adminLaunches', updatedLaunches);
                                 
                                 // Fiyat geçmişini kaydet ve kullanıcı etkisini hesapla
                                 recordPriceChange(launch.symbol, launch.name, oldPrice, newPrice);
@@ -3221,10 +3223,10 @@ export default function AdminPage() {
 }
 
 const saveUserBalance = (userBalance: any, userEmail: string) => {
-  const userBalances = localStorage.getItem('userBalances');
+  const userBalances = storage.getItem('userBalances');
   if (userBalances) {
     const balances = JSON.parse(userBalances);
     balances[userEmail] = userBalance;
-    localStorage.setItem('userBalances', JSON.stringify(balances));
+    writeJSON('userBalances', balances);
   }
 };

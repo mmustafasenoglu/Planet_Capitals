@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -25,14 +27,14 @@ export default function LaunchDetail({ launchId }: LaunchDetailProps) {
   const getCurrentUserEmail = (): string => {
     try {
       // Önce yeni anahtar sistemini kontrol et
-      const newUser = localStorage.getItem('pc_current_user');
+      const newUser = storage.getItem('pc_current_user');
       if (newUser) {
         const user = JSON.parse(newUser);
         return (user.email || '').trim().toLowerCase();
       }
       
       // Eski sistem için fallback
-      const oldUser = localStorage.getItem('currentUser');
+      const oldUser = storage.getItem('currentUser');
       if (oldUser) {
         const user = JSON.parse(oldUser);
         return (user.email || '').trim().toLowerCase();
@@ -47,8 +49,8 @@ export default function LaunchDetail({ launchId }: LaunchDetailProps) {
   // ✅ ÇIKIŞ YAPMA FONKSİYONU
   const handleLogout = () => {
     // Her iki anahtarı da temizle
-    localStorage.removeItem('pc_current_user');
-    localStorage.removeItem('currentUser');
+    storage.removeItem('pc_current_user');
+    storage.removeItem('currentUser');
     setCurrentUser(null);
     setIsLoggedIn(false);
     window.location.href = '/';
@@ -58,7 +60,7 @@ export default function LaunchDetail({ launchId }: LaunchDetailProps) {
   useEffect(() => {
     try {
       // Önce yeni anahtar sistemini kontrol et
-      const newUserData = localStorage.getItem('pc_current_user');
+      const newUserData = storage.getItem('pc_current_user');
       if (newUserData) {
         const user = JSON.parse(newUserData);
         setCurrentUser(user);
@@ -67,7 +69,7 @@ export default function LaunchDetail({ launchId }: LaunchDetailProps) {
       }
       
       // Eski sistem için fallback
-      const oldUserData = localStorage.getItem('currentUser');
+      const oldUserData = storage.getItem('currentUser');
       if (oldUserData) {
         const user = JSON.parse(oldUserData);
         setCurrentUser(user);
@@ -93,7 +95,7 @@ export default function LaunchDetail({ launchId }: LaunchDetailProps) {
         
         console.log(`🔍 Lansman aranıyor: ${launchId}`);
 
-        const savedLaunches = localStorage.getItem('adminLaunches');
+        const savedLaunches = storage.getItem('adminLaunches');
         if (savedLaunches) {
           try {
             const adminLaunchList = JSON.parse(savedLaunches);

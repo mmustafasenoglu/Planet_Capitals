@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -38,12 +40,12 @@ export default function Contact() {
     };
 
     // Get existing messages
-    const existingMessages = localStorage.getItem('contactMessages');
+    const existingMessages = storage.getItem('contactMessages');
     const messages = existingMessages ? JSON.parse(existingMessages) : [];
 
     // Add new message
     messages.push(messageData);
-    localStorage.setItem('contactMessages', JSON.stringify(messages));
+    storage.setItem('contactMessages', JSON.stringify(messages));
 
     // Simulate form submission
     setTimeout(() => {

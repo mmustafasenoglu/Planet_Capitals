@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -25,8 +27,8 @@ export default function DepositPage() {
       console.log('🔍 Aktif coinler yükleniyor...');
       
       // Admin panel wallet durumlarını kontrol et
-      const adminWalletStatus = localStorage.getItem('adminWalletStatus');
-      const walletAddressStatus = localStorage.getItem('walletAddressStatus');
+      const adminWalletStatus = storage.getItem('adminWalletStatus');
+      const walletAddressStatus = storage.getItem('walletAddressStatus');
       
       let walletStatus: any = {};
       

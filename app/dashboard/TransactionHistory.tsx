@@ -1,4 +1,6 @@
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { getUserBalance } from '../../lib/storage-helpers';
@@ -27,7 +29,7 @@ export default function TransactionHistory() {
       const allTransactions = balance.transactions || [];
       
       // ✅ DÜZELTME: ADMIN ONAYLANMIŞ ÇEKİMLERİ KONTROL ET
-      const adminWithdrawals = JSON.parse(localStorage.getItem('withdrawalHistory') || '[]');
+      const adminWithdrawals = JSON.parse(storage.getItem('withdrawalHistory') || '[]');
       const adminProcessedIds = adminWithdrawals
         .filter((w: any) => w.status === 'approved' || w.status === 'rejected')
         .map((w: any) => w.transactionId)
@@ -102,7 +104,7 @@ export default function TransactionHistory() {
           // ✅ DÜZELTME: SADECE GERÇEKTENç BEKLEYEN İŞLEMLERİ GÖSTER
           if (t.type === 'withdrawal_pending') {
             // Admin tarafından işlenmiş mi kontrol et
-            const adminWithdrawals = JSON.parse(localStorage.getItem('withdrawalHistory') || '[]');
+            const adminWithdrawals = JSON.parse(storage.getItem('withdrawalHistory') || '[]');
             const isProcessed = adminWithdrawals.some((w: any) => 
               w.transactionId === t.id && (w.status === 'approved' || w.status === 'rejected')
             );
@@ -155,7 +157,7 @@ export default function TransactionHistory() {
   const getTransactionStatus = (transaction: any) => {
     if (transaction.type === 'withdrawal_pending') {
       // ✅ DÜZELTME: ADMIN İŞLEDİ Mİ KONTROL ET
-      const adminWithdrawals = JSON.parse(localStorage.getItem('withdrawalHistory') || '[]');
+      const adminWithdrawals = JSON.parse(storage.getItem('withdrawalHistory') || '[]');
       const isProcessed = adminWithdrawals.some((w: any) => 
         w.transactionId === transaction.id && (w.status === 'approved' || w.status === 'rejected')
       );
@@ -270,7 +272,7 @@ export default function TransactionHistory() {
     // ✅ DÜZELTME: PENDING SAYIMI
     const pending = transactions.filter(t => {
       if (t.type === 'withdrawal_pending') {
-        const adminWithdrawals = JSON.parse(localStorage.getItem('withdrawalHistory') || '[]');
+        const adminWithdrawals = JSON.parse(storage.getItem('withdrawalHistory') || '[]');
         const isProcessed = adminWithdrawals.some((w: any) => 
           w.transactionId === t.id && (w.status === 'approved' || w.status === 'rejected')
         );

@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 import { createDepositRequest, getUserBalance, getCurrentUserEmail } from '../../lib/storage-helpers';
@@ -400,39 +402,46 @@ export default function DepositForm({ selectedMethod, selectedCoin, setSelectedC
     }
   };
 
-  // Load admin bank info
+  // Load admin settings and listen for DB sync updates
   useEffect(() => {
-    const savedBankInfo = localStorage.getItem('adminBankInfo');
-    if (savedBankInfo) {
-      setBankInfo(JSON.parse(savedBankInfo));
-    }
-  }, []);
+    const loadAdminSettings = () => {
+      const savedBankInfo = storage.getItem('adminBankInfo');
+      if (savedBankInfo) {
+        setBankInfo(JSON.parse(savedBankInfo));
+      }
 
-  // Load admin wallet addresses
-  useEffect(() => {
-    const savedAddresses = localStorage.getItem('adminWalletAddresses');
-    if (savedAddresses) {
-      const addresses = JSON.parse(savedAddresses);
-      setWalletAddresses({
-        USDT: addresses.USDT || 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
-        TRX: addresses.TRX || 'TPYmHEhy5n8TCEfYGqW2rPxsghSfzghPDn',
-        BTC: addresses.BTC || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
-        ETH: addresses.ETH || '0x742d35Cc6634C0532925a3b8D4B9b4A3C7C6b5E2',
-        BNB: addresses.BNB || 'bnb1a1zp1ep5qgefi2dmptftl5slmv7divfna',
-        ADA: addresses.ADA || 'addr1qxy2lpan99fcnhhyqn4x',
-        DOT: addresses.DOT || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
-        DOGE: addresses.DOGE || 'D7P2gGCjeFExVdF1zJKTYmvBpHVGZ6U8cP',
-        SOL: addresses.SOL || '7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj',
-        XRP: addresses.XRP || 'rUocf1ixiU7Fv4HSzHhvZGSjddQwHJ9kcR',
-        SUI: addresses.SUI || '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b',
-        PEPE: addresses.PEPE || '0x6982508145454Ce325dDbE47a25d4ec3d2311933'
-      });
-    }
+      const savedAddresses = storage.getItem('adminWalletAddresses');
+      if (savedAddresses) {
+        const addresses = JSON.parse(savedAddresses);
+        setWalletAddresses({
+          USDT: addresses.USDT || 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+          TRX: addresses.TRX || 'TPYmHEhy5n8TCEfYGqW2rPxsghSfzghPDn',
+          BTC: addresses.BTC || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+          ETH: addresses.ETH || '0x742d35Cc6634C0532925a3b8D4B9b4A3C7C6b5E2',
+          BNB: addresses.BNB || 'bnb1a1zp1ep5qgefi2dmptftl5slmv7divfna',
+          ADA: addresses.ADA || 'addr1qxy2lpan99fcnhhyqn4x',
+          DOT: addresses.DOT || '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+          DOGE: addresses.DOGE || 'D7P2gGCjeFExVdF1zJKTYmvBpHVGZ6U8cP',
+          SOL: addresses.SOL || '7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj',
+          XRP: addresses.XRP || 'rUocf1ixiU7Fv4HSzHhvZGSjddQwHJ9kcR',
+          SUI: addresses.SUI || '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b',
+          PEPE: addresses.PEPE || '0x6982508145454Ce325dDbE47a25d4ec3d2311933'
+        });
+      }
 
-    const savedStatus = localStorage.getItem('adminWalletStatus');
-    if (savedStatus) {
-      setWalletStatus(JSON.parse(savedStatus));
-    }
+      const savedStatus = storage.getItem('adminWalletStatus');
+      if (savedStatus) {
+        setWalletStatus(JSON.parse(savedStatus));
+      }
+    };
+
+    loadAdminSettings(); // Initial load
+
+    // Listen for sync event to trigger re-load seamlessly
+    window.addEventListener('db_sync_completed', loadAdminSettings);
+    return () => {
+      window.removeEventListener('db_sync_completed', loadAdminSettings);
+    };
   }, []);
 
   // ✅ YENİ: İLK YÜKLEME - TÜM COİN FİYATLARINI AL

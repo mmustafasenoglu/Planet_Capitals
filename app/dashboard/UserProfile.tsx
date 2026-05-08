@@ -1,5 +1,7 @@
 
 'use client';
+import { storage } from '../../lib/storage-adapter';
+
 
 import { useState, useEffect } from 'react';
 
@@ -59,7 +61,7 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
       }
 
       // Yeni anahtar sistemini kontrol et
-      const newUser = localStorage.getItem('pc_current_user');
+      const newUser = storage.getItem('pc_current_user');
       if (newUser) {
         const userData = JSON.parse(newUser);
         console.log('🔍 Yeni sistem kullanıcısı:', userData);
@@ -67,7 +69,7 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
       }
 
       // Eski sistem için fallback
-      const oldUser = localStorage.getItem('currentUser');
+      const oldUser = storage.getItem('currentUser');
       if (oldUser) {
         const userData = JSON.parse(oldUser);
         console.log('🔍 Eski sistem kullanıcısı:', userData);
@@ -76,14 +78,14 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
 
       // ✅ DÜZELTME: E-mail ile registeredUsers'tan KAPSAMLI arama
       const currentUserEmail =
-        localStorage.getItem('pc_current_user_email') ||
-        localStorage.getItem('currentUserEmail') ||
-        localStorage.getItem('userEmail');
+        storage.getItem('pc_current_user_email') ||
+        storage.getItem('currentUserEmail') ||
+        storage.getItem('userEmail');
 
       if (currentUserEmail) {
         console.log('🔍 Email ile arama yapılıyor:', currentUserEmail);
 
-        const registeredUsers = localStorage.getItem('registeredUsers');
+        const registeredUsers = storage.getItem('registeredUsers');
         if (registeredUsers) {
           const users = JSON.parse(registeredUsers);
           console.log('🔍 RegisteredUsers listesi:', users);
@@ -126,14 +128,14 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
       }
 
       // ✅ FALLBACK: Giriş yapan kullanıcının session bilgilerini kontrol et
-      const sessionData = localStorage.getItem('userSession') || localStorage.getItem('loginSession');
+      const sessionData = storage.getItem('userSession') || storage.getItem('loginSession');
       if (sessionData) {
         try {
           const session = JSON.parse(sessionData);
           console.log('🔍 Session data bulundu:', session);
 
           if (session.email) {
-            const registeredUsers = localStorage.getItem('registeredUsers');
+            const registeredUsers = storage.getItem('registeredUsers');
             if (registeredUsers) {
               const users = JSON.parse(registeredUsers);
               const foundUser = users.find((u: any) => u.email === session.email);
@@ -256,12 +258,12 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
     }
 
     // Ayarları localStorage'dan yükle
-    const savedNotifications = localStorage.getItem('userNotifications');
+    const savedNotifications = storage.getItem('userNotifications');
     if (savedNotifications) {
       setNotifications(JSON.parse(savedNotifications));
     }
 
-    const savedSecurity = localStorage.getItem('userSecurity');
+    const savedSecurity = storage.getItem('userSecurity');
     if (savedSecurity) {
       setSecuritySettings(JSON.parse(savedSecurity));
     }
@@ -270,7 +272,7 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
   // ✨ YENİ: EVRAK DURUMU YÜKLEME FONKSİYONU
   const loadDocumentStatus = (email: string) => {
     try {
-      const userDocuments = localStorage.getItem('userDocuments');
+      const userDocuments = storage.getItem('userDocuments');
       if (userDocuments) {
         const documents = JSON.parse(userDocuments);
         const userDocs = documents[email] || {};
@@ -337,12 +339,12 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
         };
 
         // LocalStorage'a kaydet
-        const userDocuments = JSON.parse(localStorage.getItem('userDocuments') || '{}');
+        const userDocuments = JSON.parse(storage.getItem('userDocuments') || '{}');
         if (!userDocuments[user.email]) {
           userDocuments[user.email] = {};
         }
         userDocuments[user.email][documentType] = documentInfo;
-        localStorage.setItem('userDocuments', JSON.stringify(userDocuments));
+        storage.setItem('userDocuments', JSON.stringify(userDocuments));
 
         // State'i güncelle
         setUploadedDocuments((prev) => ({
@@ -453,11 +455,11 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
       };
 
       // ✅ Her iki anahtar sisteminde de kaydet
-      localStorage.setItem('pc_current_user', JSON.stringify(updatedUser));
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      storage.setItem('pc_current_user', JSON.stringify(updatedUser));
+      storage.setItem('currentUser', JSON.stringify(updatedUser));
 
       // Kayıtlı kullanıcılar listesinde de güncelle
-      const registeredUsers = localStorage.getItem('registeredUsers');
+      const registeredUsers = storage.getItem('registeredUsers');
       if (registeredUsers) {
         const users = JSON.parse(registeredUsers);
         const userIndex = users.findIndex((u: any) => u.email === user.email);
@@ -469,7 +471,7 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
             birthDate: formData.birthDate,
             age: formData.birthDate ? calculateAge(formData.birthDate) : users[userIndex].age
           };
-          localStorage.setItem('registeredUsers', JSON.stringify(users));
+          storage.setItem('registeredUsers', JSON.stringify(users));
         }
       }
 
@@ -497,21 +499,21 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
   const handleNotificationChange = (key: string, value: boolean) => {
     const updated = { ...notifications, [key]: value };
     setNotifications(updated);
-    localStorage.setItem('userNotifications', JSON.stringify(updated));
+    storage.setItem('userNotifications', JSON.stringify(updated));
   };
 
   const handleSecurityChange = (key: string, value: boolean) => {
     const updated = { ...securitySettings, [key]: value };
     setSecuritySettings(updated);
-    localStorage.setItem('userSecurity', JSON.stringify(updated));
+    storage.setItem('userSecurity', JSON.stringify(updated));
   };
 
   const getAccountStats = () => {
     if (!user) return null;
 
     // ✅ YENİ ANAHTAR SİSTEMİ İLE bAKİYE KONTROLÜ - GELİŞTİRİLMİŞ
-    const newBalances = localStorage.getItem('pc_balances_v2');
-    const oldBalances = localStorage.getItem('userBalances');
+    const newBalances = storage.getItem('pc_balances_v2');
+    const oldBalances = storage.getItem('userBalances');
 
     let userBalance = { coins: {}, transactions: [], stakings: [] };
 
@@ -538,7 +540,7 @@ export default function UserProfile({ userInfo }: UserProfileProps) {
     } else {
       // ✅ DÜZELTME: registeredUsers'tan kayıt tarihini al
       try {
-        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        const registeredUsers = JSON.parse(storage.getItem('registeredUsers') || '[]');
         const foundUser = registeredUsers.find((u: any) => u.email === user.email);
         if (foundUser && foundUser.registerTime) {
           memberSince = new Date(foundUser.registerTime).toLocaleDateString('tr-TR');

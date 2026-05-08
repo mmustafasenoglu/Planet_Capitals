@@ -1,4 +1,6 @@
 'use client';
+import { storage } from '../../../lib/storage-adapter';
+
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -33,7 +35,7 @@ export default function AdminLoginPage() {
           expiresIn: 12 * 60 * 60 * 1000 // 12 saat (milisaniye)
         };
         
-        localStorage.setItem('adminSession', JSON.stringify(sessionData));
+        storage.setItem('adminSession', JSON.stringify(sessionData));
         
         // Başarılı giriş - admin paneline yönlendir
         router.push('/admin');
